@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Billing | Lakshmi Traders</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+<div class="navbar">
+    <div class="logo">
+        <img src="images/logo.png">
+        <span>LAKSHMI TRADERS</span>
+    </div>
+    <div>
+        <a href="index.html">Home</a>
+        <a href="product.html">Products</a>
+        <a href="bill.html">Bill</a>
+        <a href="contact.html">Contact</a>
+    </div>
+</div>
+
+<a href="#" onclick="logout()">Logout</a>
+
+<div class="bill-container">
+
+    <!-- LEFT FORM -->
+    <div class="bill-form">
+        <h3>Add Items</h3>
+
+        <input type="text" id="customer" placeholder="Customer Name">
+        <input type="text" id="phone" placeholder="Customer WhatsApp Number">
+
+        <input list="items" id="item" placeholder="Item Name">
+        <datalist id="items">
+            <option value="Arecanut">
+            <option value="Coconut">
+            <option value="Pepper">
+            <option value="Cashew">
+        </datalist>
+
+        <input type="number" id="qty" placeholder="Quantity (Kg)">
+        <input type="number" id="rate" placeholder="Rate (₹)">
+
+        <button onclick="addItem()">➕ Add Item</button>
+    </div>
+
+    <!-- RIGHT BILL -->
+    <div class="bill" id="billDiv">
+
+        <div class="header">
+            <img src="images/logo.png" class="bill-logo">
+            <h2>LAKSHMI TRADERS</h2>
+            <p class="sub">Coconut & Arecanut Merchant</p>
+            <p class="sub">📞 9535708853</p>
+        </div>
+
+        <div class="info">
+            <p><b>Customer:</b> <span id="cName">-</span></p>
+            <p><b>Date & Time:</b> <span id="dateTime"></span></p>
+        </div>
+
+        <table id="billTable">
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Rate</th>
+                <th>Amount</th>
+            </tr>
+        </table>
+
+        <div class="total">
+            Total : ₹ <span id="total">0</span>
+        </div>
+
+        <div class="actions">
+            <button onclick="printBill()">🖨 Print Bill</button>
+            <button onclick="sendWhatsAppImage()">📲 Send WhatsApp</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+   
+// Check if user is logged in
+if(localStorage.getItem("isLoggedIn") !== "true"){
+    alert("Please login first!");
+    window.location.href = "login.html";
+}
+
+
+function logout() {
+    localStorage.removeItem("isLoggedIn");
+    window.location.href = "login.html";
+}
+
+
+let grandTotal = 0;
+
+// Set date & time
+document.getElementById("dateTime").innerText =
+    new Date().toLocaleString("en-IN");
+
+// Add items
+function addItem() {
+    let customer = document.getElementById("customer").value;
+    let item = document.getElementById("item").value;
+    let qty = document.getElementById("qty").value;
+    let rate = document.getElementById("rate").value;
+
+    if(customer === "" || item === "" || qty === "" || rate === "") {
+        alert("Please fill all fields");
+        return;
+    }
+
+    document.getElementById("cName").innerText = customer;
+
+    let amount = qty * rate;
+    grandTotal += amount;
+
+    let table = document.getElementById("billTable");
+    let row = table.insertRow();
+
+    row.insertCell(0).innerText = item;
+    row.insertCell(1).innerText = qty;
+    row.insertCell(2).innerText = rate;
+    row.insertCell(3).innerText = amount;
+
+    document.getElementById("total").innerText = grandTotal;
+
+    document.getElementById("item").value = "";
+    document.getElementById("qty").value = "";
+    document.getElementById("rate").value = "";
+}
+
+// Print bill
+function printBill() {
+    window.print();
+}
+
+// Send bill as image to WhatsApp
+function sendWhatsAppImage() {
+    let phone = document.getElementById("phone").value;
+    if(phone === "") {
+        alert("Enter customer WhatsApp number");
+        return;
+    }
+
+    html2canvas(document.getElementById("billDiv")).then(function(canvas) {
+        // Convert canvas to data URL
+        let imgData = canvas.toDataURL("image/png");
+
+        // Open in new tab for user to save/send via WhatsApp
+        let newTab = window.open();
+        newTab.document.write('<img src="' + imgData + '" style="width:100%">');
+        newTab.document.title = "Bill Image - Lakshmi Traders";
+
+        alert("Bill captured as image. Save and send via WhatsApp manually.");
+    });
+}
+</script>
+
+</body>
+</html>
